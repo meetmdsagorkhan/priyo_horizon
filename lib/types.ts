@@ -1,4 +1,4 @@
-﻿export type LaunchPlan = "starter" | "growth" | "global";
+export type LaunchPlan = "starter" | "growth" | "global";
 export type FormationState = "delaware" | "wyoming" | "new_mexico" | "florida";
 export type Industry =
   | "software_saas"
@@ -80,5 +80,6 @@ export type ApplicationDraftValues = {
     expectedCustomerRegions: CustomerRegion[];
     requiredPaymentMethods: PaymentMethod[];
   };
+  documents?: UploadDocumentMeta[];
 };
 

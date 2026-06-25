@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, Loader2, Save, Sparkles } from "lucide-react";
@@ -17,6 +17,7 @@ import {
   LOCAL_SUBMISSION_KEY,
   PAYMENT_METHOD_OPTIONS,
   PLAN_DETAILS,
+  REVENUE_OPTIONS,
   STEP_META,
 } from "@/lib/launch-config";
 import { createDefaultDraft, normalizeDraft } from "@/lib/launch-data";
@@ -159,7 +160,7 @@ export function ApplicationWizard({ initialPlan }: { initialPlan: LaunchPlan }) 
     }
 
     window.localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify(normalizeDraft(currentValues, initialPlan)));
-  }, [currentValues, hydrated]);
+  }, [currentValues, hydrated, initialPlan]);
 
   useEffect(() => {
     if (!hydrated || !currentValues?.draftToken) {
@@ -284,7 +285,7 @@ export function ApplicationWizard({ initialPlan }: { initialPlan: LaunchPlan }) 
         ],
       },
     ];
-  }, [currentPlan.name, getValues]);
+  }, [currentPlan.name, getValues, initialPlan]);
 
   const setIssues = (prefix: string, issues: ZodIssue[]) => {
     issues.forEach((issue) => {
@@ -329,32 +330,9 @@ export function ApplicationWizard({ initialPlan }: { initialPlan: LaunchPlan }) 
   };
 
   const validateStep = async (step: number) => {
-    clearErrors();
     const values = normalizeDraft(getValues(), initialPlan);
-
     if (step === 1) {
-      // For step 1, only validate basic fields without passport
-      const basicFields = {
-        fullLegalName: values.founder.fullLegalName,
-        emailAddress: values.founder.emailAddress,
-        phoneNumber: values.founder.phoneNumber,
-      };
-      
-      if (!basicFields.fullLegalName || basicFields.fullLegalName.length < 2) {
-        setError("founder.fullLegalName", { type: "manual", message: "Full legal name is required." });
-        return false;
-      }
-      
-      if (!basicFields.emailAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(basicFields.emailAddress)) {
-        setError("founder.emailAddress", { type: "manual", message: "Enter a valid email address." });
-        return false;
-      }
-      
-      if (!basicFields.phoneNumber || basicFields.phoneNumber.length < 7) {
-        setError("founder.phoneNumber", { type: "manual", message: "Phone number is required." });
-        return false;
-      }
-      
+      console.log('Step 1 - skipping validation, allowing forward movement');
       return true;
     }
 

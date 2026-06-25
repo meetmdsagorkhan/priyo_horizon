@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Loader2, UploadCloud } from "lucide-react";
 import { useRef, useState } from "react";
@@ -12,12 +12,18 @@ export function UploadDropzone({
   ensureDraftToken,
   value,
   onUploaded,
+  documentType = "passport_id",
+  uploadUrlEndpoint = "/api/launch/documents/upload-url",
+  completeUrlEndpoint = "/api/launch/documents/complete",
 }: {
   label: string;
   draftToken?: string;
   ensureDraftToken?: () => Promise<string | null>;
   value: UploadDocumentMeta | null;
   onUploaded: (value: UploadDocumentMeta) => void;
+  documentType?: string;
+  uploadUrlEndpoint?: string;
+  completeUrlEndpoint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -30,15 +36,15 @@ export function UploadDropzone({
     try {
       const token = draftToken ?? (ensureDraftToken ? await ensureDraftToken() : null);
       if (!token) {
-        throw new Error("Complete founder details first so we can create a secure draft.");
+        throw new Error("Missing draft token.");
       }
 
-      const request = await fetch("/api/launch/documents/upload-url", {
+      const request = await fetch(uploadUrlEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           draftToken: token,
-          documentType: "passport_id",
+          documentType: documentType,
           fileName: file.name,
           mimeType: file.type || "application/octet-stream",
           size: file.size,
@@ -61,16 +67,21 @@ export function UploadDropzone({
           throw new Error("Upload failed. Please try again.");
         }
 
-        const completeRequest = await fetch("/api/launch/documents/complete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ draftToken: token, documentId: payload.document.id }),
-        });
-        const completed = await completeRequest.json();
-        if (!completeRequest.ok) {
-          throw new Error(completed.error || "Unable to finalize upload.");
+        if (completeUrlEndpoint) {
+          const completeRequest = await fetch(completeUrlEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ draftToken: token, documentId: payload.document.id }),
+          });
+          const completed = await completeRequest.json();
+          if (!completeRequest.ok) {
+            throw new Error(completed.error || "Unable to finalize upload.");
+          }
+          onUploaded(completed.document);
+        } else {
+           // Admin endpoint mock or direct upload completed
+           onUploaded(payload.document);
         }
-        onUploaded(completed.document);
       } else {
         onUploaded(payload.document);
       }

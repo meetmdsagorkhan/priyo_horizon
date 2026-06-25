@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Building2, FileText, Loader2, MailCheck, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ export function DashboardShell({ initialDraftToken }: { initialDraftToken?: stri
       };
       stateOfFormation: string;
       bankingSetup: { wantPriyoPayBusinessAccount: boolean };
+      documents?: { id: string; fileName: string; size: number; uploadStatus: string; type: string }[];
     };
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +55,7 @@ export function DashboardShell({ initialDraftToken }: { initialDraftToken?: stri
   }
 
   const plan = PLAN_DETAILS[payload.values.selectedPlan];
-  const docs = payload.values.founder.passportDocument ? [payload.values.founder.passportDocument] : [];
+  const docs = payload.values.documents || (payload.values.founder.passportDocument ? [payload.values.founder.passportDocument] : []);
 
   return (
     <div className="space-y-6">
@@ -83,11 +84,24 @@ export function DashboardShell({ initialDraftToken }: { initialDraftToken?: stri
         </GlassCard>
 
         <GlassCard className="p-6">
-          <h2 className="text-xl font-semibold text-white">Uploaded documents</h2>
+          <h2 className="text-xl font-semibold text-white">Your Documents</h2>
           <div className="mt-5 space-y-3">
             {docs.length ? docs.map((doc) => (
-              <div key={doc.id} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/6 text-primary"><FileText className="h-4 w-4" /></div><div><p className="text-sm font-medium text-white">{doc.fileName}</p><p className="text-xs text-muted">{Math.round(doc.size / 1024)} KB</p></div></div><span className="font-mono text-[11px] uppercase tracking-[0.24em] text-primary">{doc.uploadStatus.replace("_", " ")}</span></div>
-            )) : <p className="text-sm text-muted">No documents have been attached to this submission yet.</p>}
+              <div key={doc.id} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${doc.uploadStatus === "generated" ? "bg-green-500/20 text-green-400" : "bg-white/6 text-primary"}`}>
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">{doc.fileName || (doc as any).type?.replace("_", " ") || "Document"}</p>
+                    <p className="text-xs text-muted">{Math.round((doc.size || 0) / 1024)} KB</p>
+                  </div>
+                </div>
+                <span className={`font-mono text-[11px] uppercase tracking-[0.24em] ${doc.uploadStatus === "generated" ? "text-green-400" : "text-primary"}`}>
+                  {doc.uploadStatus?.replace("_", " ") || "Uploaded"}
+                </span>
+              </div>
+            )) : <p className="text-sm text-muted">No documents are attached yet.</p>}
           </div>
         </GlassCard>
       </div>

@@ -1,4 +1,4 @@
-﻿import {
+import {
   ApplicationStatus,
   BusinessAddressMode,
   DocumentStatus,
@@ -60,7 +60,7 @@ export async function createDraft(values: ApplicationDraftValues) {
   });
 
   const defaults = getPlanDefaults(normalized.selectedPlan);
-  const createdApplication = await prisma.application.create({
+  await prisma.application.create({
     data: {
       userId: user.id,
       companyName: normalized.company.primaryLLCName || "Draft LLC",
@@ -400,6 +400,7 @@ function serializeApplication(application: NonNullable<ApplicationRecord>) {
         requiredPaymentMethods:
           (application.services?.paymentMethods as ApplicationDraftValues["bankingSetup"]["requiredPaymentMethods"]) ?? [],
       },
+      documents: application.documents.map(serializeDocument),
     },
   };
 }
