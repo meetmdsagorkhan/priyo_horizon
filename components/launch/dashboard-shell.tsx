@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 
 import { Building2, FileText, Loader2, MailCheck, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
